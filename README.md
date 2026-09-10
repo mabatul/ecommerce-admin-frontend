@@ -10,9 +10,12 @@ Part of a 3-repo project — see
 [`ecommerce-admin-infra`](../ecommerce-admin-infra) for the overall
 architecture and how to bring everything up together.
 
-## Running inside the full local environment (recommended)
+## Running with Docker (recommended)
 
-From `ecommerce-admin-infra` (cloned as a sibling folder of this repo):
+This repo has its own `docker-compose.yml` and starts **independently** —
+it doesn't build or need `ecommerce-admin-infra`'s or
+`ecommerce-admin-backend`'s compose files. Bring up infra, then backend
+first (see their READMEs), then, from here:
 
 ```bash
 docker compose up
@@ -66,9 +69,10 @@ container uses).
 ## Structure
 
 ```
-app/page.tsx    Dashboard (stats + products table)
-app/layout.tsx  Root layout
-lib/api.ts      HTTP client to the backend (single source of the base URL)
+app/page.tsx        Dashboard (stats + products table)
+app/layout.tsx      Root layout
+lib/api.ts          HTTP client to the backend (single source of the base URL)
+docker-compose.yml  Runs this service on its own (see "Running with Docker" above)
 ```
 
 ## Deployment

@@ -8,14 +8,19 @@ Context for Claude Code (or any AI assistant) working in this repo.
 up the ecommerce-admin project:
 
 - **ecommerce-admin-infra** — infrastructure only (CloudFormation,
-  LocalStack, local dev docker-compose, deployment scripts, local
-  Jenkins). Lives in a sibling folder, `../ecommerce-admin-infra`.
+  LocalStack, deployment scripts, local Jenkins). Its `docker-compose.yml`
+  brings up LocalStack only. Lives in a sibling folder,
+  `../ecommerce-admin-infra`.
 - **ecommerce-admin-backend** — the Next.js API this frontend consumes.
-- **ecommerce-admin-frontend** (this repo) — the Next.js dashboard.
+  Starts independently, with its own `docker-compose.yml`.
+- **ecommerce-admin-frontend** (this repo) — the Next.js dashboard. Also
+  starts independently, with its own `docker-compose.yml`.
 
 This repo never talks to AWS/LocalStack/DynamoDB directly — it only makes
-HTTP calls to the backend, via `lib/api.ts`. See
-`ecommerce-admin-infra/README.md` for the full picture.
+HTTP calls to the backend, via `lib/api.ts`. It doesn't depend on
+`ecommerce-admin-infra`'s or `ecommerce-admin-backend`'s compose files to
+start — `docker-compose.yml` here only defines the `frontend` service. See
+`ecommerce-admin-infra/README.md` for the full bring-up sequence.
 
 ## Key design decisions (don't undo these without a reason)
 
@@ -40,9 +45,7 @@ HTTP calls to the backend, via `lib/api.ts`. See
 - Documentation (README, code comments): **English**, even though
   conversations about this project may happen in Spanish.
 - Commit messages: plain-language summaries of what changed (not
-  Conventional Commits prefixes like `feat:`/`chore:`), and they carry a
-  `Co-Authored-By: Claude ...` trailer when Claude Code made the change —
-  that trailer stays; it's a transparency requirement, not a style choice.
+  Conventional Commits prefixes like `feat:`/`chore:`).
 - Don't fabricate commit timestamps/history to make automated work look
   like it happened incrementally over time it didn't.
 

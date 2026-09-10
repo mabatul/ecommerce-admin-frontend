@@ -1,0 +1,26 @@
+# Starts this frontend on its own — does NOT depend on ecommerce-admin-infra
+# or ecommerce-admin-backend being present or built from here.
+#
+# No host.docker.internal trick needed here (unlike the backend repo):
+# NEXT_PUBLIC_API_URL is used by the BROWSER on your machine, not from
+# inside this container, so plain http://localhost:4000 (the backend's
+# published port) works regardless of Docker networking.
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ecommerce-admin-frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+      - FRONTEND_PORT=${FRONTEND_PORT:-3000}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - .:/app
+      - frontend-node-modules:/app/node_modules
+      - frontend-next-cache:/app/.next
+
+volumes:
+  frontend-node-modules:
+  frontend-next-cache:

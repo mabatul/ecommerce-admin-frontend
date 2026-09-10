@@ -33,9 +33,20 @@ pipeline {
       steps { sh 'npm run build' }
     }
 
+    // Best-effort smoke test, not required for the deploy below — Railway
+    // builds the image itself from Dockerfile.ci (per railway.json) when
+    // 'railway up' runs. Skips itself instead of failing on a Jenkins agent
+    // with no Docker daemon available (e.g. this pipeline running on the
+    // Railway-hosted Jenkins, not the local one).
     stage('Build Docker image') {
       steps {
-        sh 'docker build -f Dockerfile.ci --build-arg NEXT_PUBLIC_API_URL="$NEXT_PUBLIC_API_URL" -t ecommerce-admin-frontend:${BUILD_NUMBER} .'
+        sh '''
+          if command -v docker >/dev/null 2>&1; then
+            docker build -f Dockerfile.ci --build-arg NEXT_PUBLIC_API_URL="$NEXT_PUBLIC_API_URL" -t ecommerce-admin-frontend:${BUILD_NUMBER} .
+          else
+            echo "No Docker daemon available here — skipping (Railway builds the image itself on deploy)."
+          fi
+        '''
       }
     }
 
