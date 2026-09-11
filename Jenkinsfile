@@ -1,6 +1,13 @@
 // Pipeline for THIS repo only. Triggers and deploys independently of
 // infra/backend — doesn't depend on another job having run first.
 //
+// Runs as a Multibranch Pipeline on the cloud Jenkins (see
+// jenkins-cloud/init.groovy.d/jobs.groovy in the infra repo) — every
+// branch builds, lints and runs the smoke test, but the actual deploy
+// below only fires on 'main' (`when { branch 'main' }`). That's what
+// makes BRANCH_NAME available at all; a plain non-multibranch job
+// wouldn't have it.
+//
 // Deploying to Railway requires a Jenkins credential of type "Secret text"
 // with id 'railway-token-frontend' (a Railway Project Token, generated
 // from the project dashboard -> Settings -> Tokens) and, optionally, the
@@ -50,10 +57,10 @@ pipeline {
       }
     }
 
-    // Note: no `when { branch ... }` on purpose — see
-    // ecommerce-admin-backend/Jenkinsfile for why. Run manually with
-    // "Build Now" when you want to deploy.
+    // Only 'main' actually deploys — every other branch stops here having
+    // already proven it builds, lints and passes the smoke test above.
     stage('Deploy to Railway (dev)') {
+      when { branch 'main' }
       steps {
         withCredentials([string(credentialsId: 'railway-token-frontend', variable: 'RAILWAY_TOKEN')]) {
           sh '''
