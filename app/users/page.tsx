@@ -46,11 +46,10 @@ export default function UsersPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-slate-900">Users</h1>
-      <p className="mt-1 text-sm text-slate-500">
-        Accounts are created by people signing up on the storefront, not from here — admins can view, edit their
-        info, or remove an account, but not create one.
-      </p>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold text-slate-900">Users</h1>
+        <ButtonLink href="/users/new">Add User</ButtonLink>
+      </div>
 
       <div className="mt-4">
         <DataTable
