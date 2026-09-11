@@ -1,14 +1,33 @@
 # ecommerce-admin-frontend
 
-Admin panel dashboard (Next.js). Shows products, categories and users by
-consuming the [backend](../ecommerce-admin-backend)'s API. Renders 100%
-client-side (`"use client"` in [`app/page.tsx`](app/page.tsx)) on purpose:
-that way the same build works whether it's served by Next.js (local dev)
-or exported to static files and served from S3 (no server behind it).
+Admin panel (Next.js + Tailwind CSS) for products, categories, users,
+carts and wishlists, consuming the [backend](../ecommerce-admin-backend)'s
+API. Every page is `"use client"` on purpose: that way the same build
+works whether it's served by Next.js (local dev, Railway) or exported to
+static files and served from S3 (no server behind it) — see "Building as
+a static export" below. Dynamic routes (`/products/[id]/edit`, etc.) only
+work in the regular server-rendered build, not the static export.
 
 Part of a 3-repo project — see
 [`ecommerce-admin-infra`](../ecommerce-admin-infra) for the overall
 architecture and how to bring everything up together.
+
+## Pages
+
+| Path | What it does |
+|---|---|
+| `/` | Dashboard — counts + recently added products/users |
+| `/products`, `/products/new`, `/products/:id/edit` | Product CRUD (edit also covers stock updates) |
+| `/categories`, `/categories/new`, `/categories/:id/edit` | Category CRUD |
+| `/users`, `/users/:id` | User list + detail (view, edit, delete — no "add", matches the spec) |
+| `/carts` | Every user's cart, resolved to product names; clear a cart |
+| `/wishlists` | Every user's wishlist, resolved to product names; clear a wishlist |
+
+Shared building blocks in [`components/`](components): `DataTable` (search
++ pagination + loading/empty/error states, used by every list page),
+`ConfirmDialog` (destructive actions), `Toast` (success/error feedback),
+`Button`/`FormField` (consistent form styling), `ProductForm`/`CategoryForm`
+(reused between the "new" and "edit" pages for each).
 
 ## Running with Docker (recommended)
 
@@ -69,10 +88,16 @@ container uses).
 ## Structure
 
 ```
-app/page.tsx        Dashboard (stats + products table)
-app/layout.tsx      Root layout
-lib/api.ts          HTTP client to the backend (single source of the base URL)
-docker-compose.yml  Runs this service on its own (see "Running with Docker" above)
+app/page.tsx           Dashboard
+app/layout.tsx         Root layout (sidebar nav + toast provider)
+app/products/          List, add, edit
+app/categories/        List, add, edit
+app/users/             List, detail (view/edit/delete)
+app/carts/             All carts, resolved to product names
+app/wishlists/         All wishlists, resolved to product names
+components/            Shared DataTable, ConfirmDialog, Toast, Button, forms
+lib/api.ts             HTTP client to the backend (single source of the base URL)
+docker-compose.yml     Runs this service on its own (see "Running with Docker" above)
 ```
 
 ## Deployment

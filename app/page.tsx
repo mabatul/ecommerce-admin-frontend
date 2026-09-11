@@ -1,85 +1,106 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api, type Product, type Category, type User } from "@/lib/api";
+import { api, type Stats, type Health } from "@/lib/api";
 
-// Client-rendered on purpose: this page must also work as a static export
-// served from S3 (no server available to fetch data at build/request time).
 export default function DashboardPage() {
-  const [health, setHealth] = useState<{ status: string; environment: string; backedBy: string } | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [health, setHealth] = useState<Health | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([api.health(), api.products(), api.categories(), api.users()])
-      .then(([health, products, categories, users]) => {
+    Promise.all([api.stats(), api.health()])
+      .then(([stats, health]) => {
+        setStats(stats);
         setHealth(health);
-        setProducts(products);
-        setCategories(categories);
-        setUsers(users);
       })
-      .catch((err) => setError(err.message));
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
   }, []);
 
-  const categoryName = (id: string) => categories.find((c) => c.categoryId === id)?.name ?? id;
-
   return (
-    <main style={{ maxWidth: 960, margin: "0 auto", padding: "2rem 1rem" }}>
-      <h1 style={{ marginBottom: 0 }}>ecommerce-admin</h1>
-      <p style={{ color: "#666" }}>
+    <div className="max-w-5xl">
+      <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
+      <p className="mt-1 text-sm text-slate-500">
         {health ? (
           <>
-            backend: <strong>{health.status}</strong> · environment: <strong>{health.environment}</strong> ·
-            data source: <strong>{health.backedBy}</strong>
+            backend: <span className="font-medium text-slate-700">{health.status}</span> · environment:{" "}
+            <span className="font-medium text-slate-700">{health.environment}</span> · data source:{" "}
+            <span className="font-medium text-slate-700">{health.backedBy}</span>
           </>
         ) : error ? (
-          <span style={{ color: "crimson" }}>Could not reach backend: {error}</span>
+          <span className="text-red-600">Could not reach backend: {error}</span>
         ) : (
           "Connecting to backend..."
         )}
       </p>
 
-      <section style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem", margin: "1.5rem 0" }}>
-        <StatCard label="Products" value={products.length} />
-        <StatCard label="Categories" value={categories.length} />
-        <StatCard label="Users" value={users.length} />
+      <section className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <StatCard label="Total Users" value={stats?.totalUsers} loading={loading} />
+        <StatCard label="Total Products" value={stats?.totalProducts} loading={loading} />
+        <StatCard label="Total Categories" value={stats?.totalCategories} loading={loading} />
+        <StatCard label="Cart Items" value={stats?.cartItems} loading={loading} />
+        <StatCard label="Wishlist Items" value={stats?.wishlistItems} loading={loading} />
       </section>
 
-      <h2>Products</h2>
-      <table style={{ width: "100%", borderCollapse: "collapse", background: "#fff" }}>
-        <thead>
-          <tr style={{ textAlign: "left", borderBottom: "2px solid #e2e2e2" }}>
-            <th style={{ padding: "0.5rem" }}>Name</th>
-            <th style={{ padding: "0.5rem" }}>Category</th>
-            <th style={{ padding: "0.5rem" }}>Price</th>
-            <th style={{ padding: "0.5rem" }}>Stock</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((product) => (
-            <tr key={product.productId} style={{ borderBottom: "1px solid #eee" }}>
-              <td style={{ padding: "0.5rem" }}>{product.name}</td>
-              <td style={{ padding: "0.5rem" }}>{categoryName(product.categoryId)}</td>
-              <td style={{ padding: "0.5rem" }}>${product.price.toFixed(2)}</td>
-              <td style={{ padding: "0.5rem" }}>{product.stock}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {products.length === 0 && !error && (
-        <p style={{ color: "#999" }}>No products yet — run the seed script (see README).</p>
+      {error && (
+        <p className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
       )}
-    </main>
+
+      {stats && (
+        <section className="mt-8 grid gap-6 sm:grid-cols-2">
+          <ActivityList
+            title="Recently added products"
+            items={stats.recentProducts.map((p) => ({ id: p.productId, primary: p.name, secondary: `$${p.price.toFixed(2)}` }))}
+            emptyMessage="No products yet."
+          />
+          <ActivityList
+            title="Recently added users"
+            items={stats.recentUsers.map((u) => ({ id: u.userId, primary: u.name, secondary: u.email }))}
+            emptyMessage="No users yet."
+          />
+        </section>
+      )}
+    </div>
   );
 }
 
-function StatCard({ label, value }: { label: string; value: number }) {
+function StatCard({ label, value, loading }: { label: string; value?: number; loading: boolean }) {
   return (
-    <div style={{ background: "#fff", border: "1px solid #e2e2e2", borderRadius: 8, padding: "1rem" }}>
-      <div style={{ fontSize: "0.8rem", color: "#666" }}>{label}</div>
-      <div style={{ fontSize: "1.8rem", fontWeight: 600 }}>{value}</div>
+    <div className="rounded-xl border border-slate-200 bg-white p-4">
+      <div className="text-xs text-slate-500">{label}</div>
+      <div className="mt-1 text-2xl font-semibold text-slate-900">
+        {loading ? <span className="text-slate-300">—</span> : value ?? 0}
+      </div>
+    </div>
+  );
+}
+
+function ActivityList({
+  title,
+  items,
+  emptyMessage,
+}: {
+  title: string;
+  items: { id: string; primary: string; secondary: string }[];
+  emptyMessage: string;
+}) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4">
+      <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
+      {items.length === 0 ? (
+        <p className="mt-3 text-sm text-slate-400">{emptyMessage}</p>
+      ) : (
+        <ul className="mt-3 divide-y divide-slate-100">
+          {items.map((item) => (
+            <li key={item.id} className="flex items-center justify-between py-2 text-sm">
+              <span className="text-slate-800">{item.primary}</span>
+              <span className="text-slate-400">{item.secondary}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
