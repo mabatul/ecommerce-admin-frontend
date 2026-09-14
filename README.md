@@ -19,9 +19,9 @@ architecture and how to bring everything up together.
 | `/` | Dashboard — counts + recently added products/users |
 | `/products`, `/products/new`, `/products/:id/edit` | Product CRUD (edit also covers stock updates) |
 | `/categories`, `/categories/new`, `/categories/:id/edit` | Category CRUD |
-| `/users`, `/users/:id` | User list + detail (view, edit, delete — no "add", matches the spec) |
-| `/carts` | Every user's cart, resolved to product names; clear a cart |
-| `/wishlists` | Every user's wishlist, resolved to product names; clear a wishlist |
+| `/users`, `/users/new`, `/users/:id` | User CRUD — detail page has view/edit/delete inline |
+| `/carts` | Every user's cart, resolved to product names; remove one item or clear the whole cart |
+| `/wishlists` | Every user's wishlist, resolved to product names; remove one item or clear the whole wishlist |
 
 Shared building blocks in [`components/`](components): `DataTable` (search
 + pagination + loading/empty/error states, used by every list page),
@@ -55,8 +55,7 @@ npm run dev
 
 ## Building as a static export (for S3 deployment)
 
-This is the flow `ecommerce-admin-infra/scripts/deploy-frontend.sh` would
-use — no need to run it by hand normally:
+Not currently wired into any deploy script — run by hand if needed:
 
 ```bash
 STATIC_EXPORT=true NEXT_PUBLIC_API_URL=<backend-url> npm run build
@@ -92,7 +91,7 @@ app/page.tsx           Dashboard
 app/layout.tsx         Root layout (sidebar nav + toast provider)
 app/products/          List, add, edit
 app/categories/        List, add, edit
-app/users/             List, detail (view/edit/delete)
+app/users/             List, add, detail (view/edit/delete)
 app/carts/             All carts, resolved to product names
 app/wishlists/         All wishlists, resolved to product names
 components/            Shared DataTable, ConfirmDialog, Toast, Button, forms
