@@ -105,9 +105,11 @@ export const api = {
 
   carts: () => get<Cart[]>("/api/carts"),
   cart: (userId: string) => get<Cart>(`/api/carts/${userId}`),
+  updateCart: (userId: string, items: CartItem[]) => put<Cart>(`/api/carts/${userId}`, { items }),
   deleteCart: (userId: string) => del<void>(`/api/carts/${userId}`),
 
   wishlists: () => get<Wishlist[]>("/api/wishlists"),
   wishlist: (userId: string) => get<Wishlist>(`/api/wishlists/${userId}`),
+  updateWishlist: (userId: string, productIds: string[]) => put<Wishlist>(`/api/wishlists/${userId}`, { productIds }),
   deleteWishlist: (userId: string) => del<void>(`/api/wishlists/${userId}`),
 };

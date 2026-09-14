@@ -54,6 +54,23 @@ export default function CartsPage() {
     }
   }
 
+  async function removeItem(cart: Cart, productId: string) {
+    const items = cart.items.filter((i) => i.productId !== productId);
+    try {
+      const updated = await api.updateCart(cart.userId, items);
+      // Dropping the last item empties the cart, which reads the same as
+      // "clear" — take it off the list instead of showing an empty card.
+      setCarts((prev) =>
+        updated.items.length === 0
+          ? prev.filter((c) => c.userId !== cart.userId)
+          : prev.map((c) => (c.userId === cart.userId ? updated : c))
+      );
+      toast.success(`Removed "${productName(productId)}" from ${userName(cart.userId)}'s cart.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to remove item.");
+    }
+  }
+
   return (
     <div>
       <h1 className="text-xl font-semibold text-slate-900">Carts</h1>
@@ -92,9 +109,19 @@ export default function CartsPage() {
               </div>
               <ul className="mt-3 divide-y divide-slate-100 text-sm">
                 {cart.items.map((item) => (
-                  <li key={item.productId} className="flex justify-between py-1.5">
+                  <li key={item.productId} className="flex items-center justify-between py-1.5">
                     <span className="text-slate-700">{productName(item.productId)}</span>
-                    <span className="text-slate-400">x{item.quantity}</span>
+                    <span className="flex items-center gap-3">
+                      <span className="text-slate-400">x{item.quantity}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeItem(cart, item.productId)}
+                        className="text-xs font-medium text-slate-400 hover:text-red-600"
+                        aria-label={`Remove ${productName(item.productId)} from ${userName(cart.userId)}'s cart`}
+                      >
+                        Remove
+                      </button>
+                    </span>
                   </li>
                 ))}
               </ul>

@@ -56,6 +56,23 @@ export default function WishlistsPage() {
     }
   }
 
+  async function removeItem(wishlist: Wishlist, productId: string) {
+    const productIds = wishlist.productIds.filter((id) => id !== productId);
+    try {
+      const updated = await api.updateWishlist(wishlist.userId, productIds);
+      // Dropping the last item empties the wishlist, which reads the same
+      // as "clear" — take it off the list instead of showing an empty card.
+      setWishlists((prev) =>
+        updated.productIds.length === 0
+          ? prev.filter((w) => w.userId !== wishlist.userId)
+          : prev.map((w) => (w.userId === wishlist.userId ? updated : w))
+      );
+      toast.success(`Removed "${productName(productId)}" from ${userName(wishlist.userId)}'s wishlist.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to remove item.");
+    }
+  }
+
   return (
     <div>
       <h1 className="text-xl font-semibold text-slate-900">Wishlists</h1>
@@ -94,8 +111,19 @@ export default function WishlistsPage() {
               </div>
               <ul className="mt-3 flex flex-wrap gap-2 text-sm">
                 {wishlist.productIds.map((productId) => (
-                  <li key={productId} className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-700">
+                  <li
+                    key={productId}
+                    className="flex items-center gap-1.5 rounded-full bg-slate-100 py-1 pl-2.5 pr-1.5 text-slate-700"
+                  >
                     {productName(productId)}
+                    <button
+                      type="button"
+                      onClick={() => removeItem(wishlist, productId)}
+                      className="rounded-full px-1 text-slate-400 hover:bg-slate-200 hover:text-red-600"
+                      aria-label={`Remove ${productName(productId)} from ${userName(wishlist.userId)}'s wishlist`}
+                    >
+                      ×
+                    </button>
                   </li>
                 ))}
               </ul>
