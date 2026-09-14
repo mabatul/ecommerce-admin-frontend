@@ -1,6 +1,3 @@
-// The browser calls the backend directly; the URL comes entirely from
-// config (NEXT_PUBLIC_API_URL), never hardcoded, so the same build works
-// against the local backend container, dev, or prod.
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {

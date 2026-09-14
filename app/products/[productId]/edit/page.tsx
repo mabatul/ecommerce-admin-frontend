@@ -5,9 +5,7 @@ import { useParams } from "next/navigation";
 import { api, type Category, type Product } from "@/lib/api";
 import { ProductForm } from "@/components/ProductForm";
 
-// Client-side data fetching by id (not generateStaticParams) — this page
-// only ever runs in the regular Next.js server deploy (Dockerfile.ci),
-// not the STATIC_EXPORT=true S3 build; see next.config.js.
+// Server deploy only (Dockerfile.ci), not the STATIC_EXPORT build.
 export default function EditProductPage() {
   const { productId } = useParams<{ productId: string }>();
   const [product, setProduct] = useState<Product | null>(null);

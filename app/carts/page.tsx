@@ -58,8 +58,6 @@ export default function CartsPage() {
     const items = cart.items.filter((i) => i.productId !== productId);
     try {
       const updated = await api.updateCart(cart.userId, items);
-      // Dropping the last item empties the cart, which reads the same as
-      // "clear" — take it off the list instead of showing an empty card.
       setCarts((prev) =>
         updated.items.length === 0
           ? prev.filter((c) => c.userId !== cart.userId)

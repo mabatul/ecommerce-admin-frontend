@@ -2,8 +2,6 @@
 
 import type { ReactNode } from "react";
 
-// Label + control + validation error, in the same layout everywhere a
-// form needs it (product/category/user create & edit forms).
 export function FormField({
   label,
   error,

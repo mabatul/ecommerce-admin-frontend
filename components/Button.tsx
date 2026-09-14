@@ -25,9 +25,7 @@ export function Button({ variant = "primary", className = "", disabled, ...props
   );
 }
 
-// Same visual treatment as Button, but for navigation (Next's Link
-// doesn't accept a `disabled` prop, so this stays a separate component
-// rather than one that conditionally renders <a> vs <button>).
+// Same styling as Button, for navigation links.
 export function ButtonLink({
   href,
   variant = "primary",

@@ -60,8 +60,6 @@ export default function WishlistsPage() {
     const productIds = wishlist.productIds.filter((id) => id !== productId);
     try {
       const updated = await api.updateWishlist(wishlist.userId, productIds);
-      // Dropping the last item empties the wishlist, which reads the same
-      // as "clear" — take it off the list instead of showing an empty card.
       setWishlists((prev) =>
         updated.productIds.length === 0
           ? prev.filter((w) => w.userId !== wishlist.userId)

@@ -5,9 +5,7 @@ import { useMemo, useState, type ReactNode } from "react";
 export interface Column<T> {
   header: string;
   cell: (row: T) => ReactNode;
-  // Text this column contributes to the search filter. Omit for
-  // action/computed columns that shouldn't be searchable.
-  searchValue?: (row: T) => string;
+  searchValue?: (row: T) => string; // omit for non-searchable columns
 }
 
 interface DataTableProps<T> {
@@ -22,9 +20,7 @@ interface DataTableProps<T> {
   actions?: (row: T) => ReactNode;
 }
 
-// Generic list view: search + pagination + loading/error/empty states,
-// shared by every "view X" page (products, categories, users, carts,
-// wishlists) instead of each one reimplementing the same table chrome.
+// Search + pagination + loading/error/empty states, shared by every list page.
 export function DataTable<T>({
   rows,
   columns,

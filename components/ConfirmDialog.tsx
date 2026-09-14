@@ -1,8 +1,6 @@
 "use client";
 
-// Simple, dependency-free confirmation modal — every destructive action
-// (delete product/category/user/cart/wishlist) routes through this
-// instead of `window.confirm`, so it's styled consistently and testable.
+// Used instead of window.confirm for every destructive action.
 interface ConfirmDialogProps {
   open: boolean;
   title: string;
