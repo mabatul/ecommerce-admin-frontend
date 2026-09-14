@@ -101,12 +101,23 @@ docker-compose.yml     Runs this service on its own (see "Running with Docker" a
 
 ## Deployment
 
-**Real CI/CD**: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) —
-lint + build on every push/PR to any branch; on `main`, also deploys to
-Railway (Railway builds the actual image itself from
-[`Dockerfile.ci`](Dockerfile.ci), per [`railway.json`](railway.json) — the
-workflow just calls `railway up`). Free and unlimited for this public
-repo.
+**CI/CD**: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) has two
+jobs:
+
+- **`build`** — every push (any branch) and every pull request into `main`:
+  `npm ci`, `npm run lint`, then `npm run build` with `NEXT_PUBLIC_API_URL`
+  from the repository variable described below (baked into the client
+  bundle at build time — see "Environment variables" above).
+- **`deploy`** — only after `build` succeeds, and only on a push to `main`.
+  Installs the Railway CLI and runs
+  `railway up --service ecommerce-admin-frontend --detach`, which builds
+  the production image on Railway's side from
+  [`Dockerfile.ci`](Dockerfile.ci) (per [`railway.json`](railway.json)) and
+  deploys it. `--detach` means the workflow doesn't wait for that remote
+  build to finish — check the Railway dashboard to confirm it actually went
+  green.
+
+Free and unlimited for this public repo.
 
 For the deploy job to work, you need:
 
